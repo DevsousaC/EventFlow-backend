@@ -15,7 +15,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - api-network
+      - eventflow-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -37,7 +37,7 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - api-network
+      - eventflow-network
 
   api:
     build:
@@ -55,7 +55,7 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - api-network
+      - eventflow-network
     deploy:
       replicas: 3
 
@@ -71,13 +71,13 @@ services:
       api:
         condition: service_started
     networks:
-      - api-network
+      - eventflow-network
 
 networks:
-  api-network:
+  eventflow-network:
     driver: bridge
-    name: api-network
+    name: eventflow-network
 
 volumes:
   postgres_data:
-    name: api-postgres-data
+    name: eventflow-postgres-data
