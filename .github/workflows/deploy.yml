@@ -4,11 +4,12 @@ on:
   push:
     branches:
       - main
-      - dev
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout
@@ -23,13 +24,6 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           script: |
             cd ~/dev/EventFlow-backend
-            git pull origin ${{ github.ref_name }}
-
-            if [ "${{ github.ref_name }}" = "main" ]; then
-              docker compose -f compose.yaml down
-              docker compose -f compose.yaml up --build -d
-
-            elif [ "${{ github.ref_name }}" = "dev" ]; then
-              docker compose -f compose.yaml -f compose.override.yaml down
-              docker compose -f compose.yaml -f compose.override.yaml up --build -d
-            fi
+            git pull origin main
+            docker compose -f compose.yaml down
+            docker compose -f compose.yaml up --build -d
