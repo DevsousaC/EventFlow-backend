@@ -1,0 +1,35 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            cd ~/dev/EventFlow-backend
+            git pull origin ${{ github.ref_name }}
+
+            if [ "${{ github.ref_name }}" = "main" ]; then
+              docker compose -f docker-compose.yml down
+              docker compose -f docker-compose.yml up --build -d
+
+            elif [ "${{ github.ref_name }}" = "dev" ]; then
+              docker compose -f docker-compose.yml -f docker-compose.override.yml down
+              docker compose -f docker-compose.yml -f docker-compose.override.yml up --build -d
+            fi
