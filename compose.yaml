@@ -57,7 +57,7 @@ services:
     networks:
       - eventflow-network
     deploy:
-      replicas: 3
+      replicas: 1
 
   nginx:
     image: nginx:alpine
