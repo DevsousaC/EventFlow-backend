@@ -3,12 +3,15 @@ package spring.infra.api.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 
+import java.util.Set;
+import java.util.UUID;
+
 @Entity
-@Table(name = "Users")
+@Table(name = "User")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Email(message = "Invalid email format")
     @Column(name = "email", nullable = false, unique = true)
@@ -20,16 +23,18 @@ public class User {
     @Column(name = "name", nullable = false)
     private String name;
 
-    public User() {}
-    public User(String email, String passwd, String name) {
-        this.id = id;
-        this.email = email;
-        this.name = name;
-        this.passwd = passwd;
-    }
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles;
 
-    public Long getId() {return id;}
-    public void setId(Long id) {
+
+
+    public UUID getId() {return id;}
+    public void setId(UUID id) {
         this.id = id;
     }
 

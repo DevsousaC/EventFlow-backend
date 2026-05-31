@@ -1,3 +1,10 @@
 spring:
   application:
     name: api
+
+jwt:
+  private:
+    key: "123"
+  public:
+    key: "123"
+
