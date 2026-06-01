@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -25,15 +26,22 @@ import java.security.interfaces.RSAPublicKey;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final RateLimitingFilter rateLimitingFilter;
+
     @Value("${jwt.public.key}")
     private RSAPublicKey publicKey;
     @Value("${jwt.private.key}")
     private RSAPrivateKey privateKey;
 
+    public SecurityConfig(RateLimitingFilter rateLimitingFilter) {
+        this.rateLimitingFilter = rateLimitingFilter;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // TODO: Enable and configure the CSRF before up to prod
         http
+                .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .anyRequest().authenticated())
