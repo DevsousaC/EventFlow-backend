@@ -6,12 +6,14 @@ import org.springframework.transaction.annotation.Transactional;
 import spring.infra.api.dtos.auth.SignupRequest;
 import spring.infra.api.dtos.auth.SignupResponse;
 import spring.infra.api.exceptions.EmailAlreadyExistsException;
+import spring.infra.api.exceptions.InvalidRoleCombinationException;
 import spring.infra.api.models.Role;
 import spring.infra.api.models.User;
 import spring.infra.api.repository.RoleRepository;
 import spring.infra.api.repository.UserRepository;
 
 import java.util.Collections;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -43,6 +45,9 @@ public class UserService {
         user.setPhone(request.phone());
         user.setRoles(Collections.singleton(defaultRole));
 
+        // Validar combinação de roles antes de salvar
+        validateRolesCombination(user.getRoles());
+
         User savedUser = userRepository.save(user);
 
         return new SignupResponse(
@@ -51,5 +56,22 @@ public class UserService {
                 savedUser.getName(),
                 savedUser.getPhone()
         );
+    }
+
+    public void validateRolesCombination(Set<Role> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return;
+        }
+
+        boolean hasVisitant = roles.stream().anyMatch(r -> r.getName().equals("VISITANT"));
+        boolean hasStandCreator = roles.stream().anyMatch(r -> r.getName().equals("STAND_CREATOR"));
+        boolean hasEventCreator = roles.stream().anyMatch(r -> r.getName().equals("EVENT_CREATOR"));
+
+        // Regra: VISITANT não pode ter STAND_CREATOR ou EVENT_CREATOR
+        if (hasVisitant && (hasStandCreator || hasEventCreator)) {
+            throw new InvalidRoleCombinationException(
+                "A user with VISITANT role cannot hold STAND_CREATOR or EVENT_CREATOR roles simultaneously."
+            );
+        }
     }
 }

@@ -21,6 +21,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
+    @ExceptionHandler(InvalidRoleCombinationException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidRoleCombination(InvalidRoleCombinationException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Map<String, String>> handleBadCredentialsException(BadCredentialsException ex) {
         Map<String, String> response = new HashMap<>();
