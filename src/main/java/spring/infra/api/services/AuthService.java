@@ -34,7 +34,7 @@ public class AuthService {
         try{
             Optional<User> userFound = userRepository.findByEmail(signinRequest.getEmail());
 
-            if(!userFound.isEmpty() || !passwordEncoder.matches(signinRequest.getPasswd(), userFound.get().getPasswd())){
+            if(userFound.isEmpty() || !passwordEncoder.matches(signinRequest.getPasswd(), userFound.get().getPasswd())){
                 throw new BadCredentialsException("user or/and password is invalid!");
             }
 
