@@ -33,11 +33,12 @@ public class AuthService {
     public SigninResponse signin(SigninRequest signinRequest) {
         try{
             Optional<User> userFound = userRepository.findByEmail(signinRequest.getEmail());
-            User user = userFound.get();
 
-            if(!userFound.isEmpty() || !passwordEncoder.matches(signinRequest.getPasswd(), user.getPasswd())){
+            if(!userFound.isEmpty() || !passwordEncoder.matches(signinRequest.getPasswd(), userFound.get().getPasswd())){
                 throw new BadCredentialsException("user or/and password is invalid!");
             }
+
+            User user = userFound.get();
 
             var now = Instant.now();
             var expiresIn = 300L;
