@@ -11,6 +11,10 @@ RUN mvn dependency:go-offline -B
 
 # Copia o código-fonte e compila
 COPY src ./src
+
+# ADICIONE ESTA LINHA TEMPORÁRIA AQUI PARA VALIDAR:
+RUN ls -R src/main/resources
+
 RUN mvn clean package -DskipTests -B
 
 # ==========================================

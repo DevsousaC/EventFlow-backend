@@ -1,5 +1,7 @@
 # Environment
 .env
+certs/app.key
+certs/app.pub
 
 
 HELP.md
