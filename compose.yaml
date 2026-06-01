@@ -10,8 +10,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-    # Em produção, preferencialmente não expomos a porta 5432 ao host para maior segurança,
-    # mas caso precise acessar externamente, pode mantê-la exposta.
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
@@ -24,22 +22,22 @@ services:
       timeout: 5s
       retries: 5
 
-#  pgadmin:
-#    image: dpage/pgadmin4:latest
-#    container_name: api-pgadmin
-#    restart: unless-stopped
-#    env_file:
-#      - .env
-#    environment:
-#      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-#      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-#    ports:
-#      - "${PGADMIN_PORT:-5050}:80"
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
-#    networks:
-#      - eventflow-network
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: api-pgadmin
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - eventflow-network
 
   api:
     build:
@@ -53,11 +51,11 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SERVER_PORT: 8080
-      SPRING_DOCKER_COMPOSE_ENABLED: "false" # Desativa a integração de desenvolvimento no container de prod
+      SPRING_DOCKER_COMPOSE_ENABLED: "false"
       JWT_PRIVATE_KEY: file:/app/certs/app.key
       JWT_PUBLIC_KEY: file:/app/certs/app.pub
     volumes:
-      - ./certs:/app/certs:ro # Monta as chaves geradas em modo somente leitura
+      - ./certs:/app/certs:ro
     depends_on:
       postgres:
         condition: service_healthy

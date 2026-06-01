@@ -1,7 +1,6 @@
 package spring.infra.api.services;
 
 import jakarta.transaction.Transactional;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
