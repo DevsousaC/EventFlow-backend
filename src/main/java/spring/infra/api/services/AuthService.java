@@ -31,9 +31,9 @@ public class AuthService {
     @Transactional
     public SigninResponse signin(SigninRequest signinRequest) {
         try{
-            Optional<User> userFound = userRepository.findByEmail(signinRequest.getEmail());
+            Optional<User> userFound = userRepository.findByEmail(signinRequest.email());
 
-            if(userFound.isEmpty() || !passwordEncoder.matches(signinRequest.getPasswd(), userFound.get().getPasswd())){
+            if(userFound.isEmpty() || !passwordEncoder.matches(signinRequest.passwd(), userFound.get().getPasswd())){
                 throw new BadCredentialsException("user or/and password is invalid!");
             }
 
