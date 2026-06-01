@@ -17,15 +17,5 @@ public class Role {
     public String getName() {return name;}
     public void setName(String name) {this.name = name;}
 
-    public enum Values {
-        EVENT_CREATOR(3L),
-        STAND_CREATOR(2L),
-        VISITANT(1L);
 
-        Long roleId;
-
-        Values(long roleId) {
-            this.roleId = roleId;
-        }
-    }
 }

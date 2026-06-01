@@ -7,6 +7,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-public interface UserRoleRepository extends JpaRepository<UserRole, UUID> {
+public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
     Optional<Set<UserRole>> findByUserId(UUID userId);
 }

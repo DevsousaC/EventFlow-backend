@@ -33,3 +33,8 @@ CREATE TABLE user_roles (
 
 CREATE INDEX idx_user_roles_user_id ON user_roles (user_id);
 CREATE INDEX idx_user_roles_role_id ON user_roles (role_id);
+
+-- Popular tabela role com os registros iniciais
+INSERT INTO role (role_id, name) VALUES (1, 'VISITANT') ON CONFLICT DO NOTHING;
+INSERT INTO role (role_id, name) VALUES (2, 'STAND_CREATOR') ON CONFLICT DO NOTHING;
+INSERT INTO role (role_id, name) VALUES (3, 'EVENT_CREATOR') ON CONFLICT DO NOTHING;

@@ -1,23 +1,24 @@
 package spring.infra.api.models;
 
 import jakarta.persistence.*;
-import spring.infra.api.enums.Role;
-
 import java.util.UUID;
 
 @Entity
 @Table(name = "user_roles")
 public class UserRole {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_roles_id")
+    private Long userRolesId;
+
     @Column(name = "user_id", nullable = false)
     private UUID userId;
+
     @Column(name = "role_id", nullable = false)
-    private Role roleId;
+    private Long roleId;
 
     public UserRole(){}
-    public UserRole(UUID userId, Role roleId){
+    public UserRole(UUID userId, Long roleId){
         this.userId = userId;
         this.roleId = roleId;
     }
@@ -27,13 +28,13 @@ public class UserRole {
         this.userId = userId;
     }
 
-    public Role getRoleId() {return roleId;}
-    public void setRoleId(Role roleId) {
+    public Long getRoleId() {return roleId;}
+    public void setRoleId(Long roleId) {
         this.roleId = roleId;
     }
 
-    public UUID getId() {return id;}
-    public void setId(UUID id) {
-        this.id = id;
+    public Long getUserRolesId() {return userRolesId;}
+    public void setUserRolesId(Long userRolesId) {
+        this.userRolesId = userRolesId;
     }
 }
