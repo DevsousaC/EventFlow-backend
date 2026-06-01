@@ -1,10 +1,13 @@
 spring:
   application:
     name: api
+  docker:
+    compose:
+      file: compose.dev.yaml
+      lifecycle-management: start-and-keep-alive
 
 jwt:
   private:
-    key: "123"
+    key: ${JWT_PRIVATE_KEY:file:certs/app.key}
   public:
-    key: "123"
-
+    key: ${JWT_PUBLIC_KEY:file:certs/app.pub}
