@@ -5,7 +5,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import spring.infra.api.dtos.auth.SigninRequest;
-import spring.infra.api.dtos.auth.SigninResponse;
+import spring.infra.api.dtos.auth.TokenPair;
 import spring.infra.api.models.User;
 import spring.infra.api.repository.UserRepository;
 
@@ -25,7 +25,7 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public SigninResponse signin(SigninRequest request) {
+    public TokenPair signin(SigninRequest request) {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
@@ -36,11 +36,15 @@ public class AuthService {
         String accessToken = tokenService.generateAccessToken(user);
         String refreshToken = tokenService.generateRefreshToken(user.getId());
 
-        return new SigninResponse(accessToken, refreshToken, 300L);
+        return new TokenPair(accessToken, refreshToken, 300L);
     }
 
     @Transactional(readOnly = true)
-    public SigninResponse refresh(String oldRefreshToken) {
+    public TokenPair refresh(String oldRefreshToken) {
+        if (oldRefreshToken == null || oldRefreshToken.isEmpty()) {
+            throw new BadCredentialsException("Missing refresh token");
+        }
+
         String userIdStr = tokenService.getUserIdFromRefreshToken(oldRefreshToken);
         UUID userId = UUID.fromString(userIdStr);
 
@@ -54,10 +58,12 @@ public class AuthService {
         String newAccessToken = tokenService.generateAccessToken(user);
         String newRefreshToken = tokenService.generateRefreshToken(user.getId());
 
-        return new SigninResponse(newAccessToken, newRefreshToken, 300L);
+        return new TokenPair(newAccessToken, newRefreshToken, 300L);
     }
 
     public void logout(String refreshToken) {
-        tokenService.revokeRefreshToken(refreshToken);
+        if (refreshToken != null && !refreshToken.isEmpty()) {
+            tokenService.revokeRefreshToken(refreshToken);
+        }
     }
 }
