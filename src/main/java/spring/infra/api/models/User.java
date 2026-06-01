@@ -23,6 +23,9 @@ public class User {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "phone")
+    private String phone;
+
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
@@ -53,10 +56,12 @@ public class User {
         this.name = name;
     }
 
-    public Set<Role> getRoles() {
-        return roles;
+    public String getPhone() {return phone;}
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
+    public Set<Role> getRoles() {return roles;}
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
