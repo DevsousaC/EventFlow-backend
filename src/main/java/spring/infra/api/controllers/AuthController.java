@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import spring.infra.api.dtos.auth.RefreshTokenRequest;
 import spring.infra.api.dtos.auth.SigninRequest;
 import spring.infra.api.dtos.auth.SigninResponse;
 import spring.infra.api.dtos.auth.SignupRequest;
@@ -36,5 +37,17 @@ public class AuthController {
     public ResponseEntity<SignupResponse> signup(@Valid @RequestBody SignupRequest signupRequest) {
         SignupResponse signupResponse = this.userService.signup(signupRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(signupResponse);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<SigninResponse> refresh(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
+        SigninResponse signinResponse = this.authService.refresh(refreshTokenRequest.refreshToken());
+        return ResponseEntity.ok(signinResponse);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
+        this.authService.logout(refreshTokenRequest.refreshToken());
+        return ResponseEntity.noContent().build();
     }
 }

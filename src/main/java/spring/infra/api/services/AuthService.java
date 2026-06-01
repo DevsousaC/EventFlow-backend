@@ -1,59 +1,63 @@
 package spring.infra.api.services;
 
-import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
-import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import spring.infra.api.dtos.auth.SigninRequest;
 import spring.infra.api.dtos.auth.SigninResponse;
 import spring.infra.api.models.User;
 import spring.infra.api.repository.UserRepository;
 
-import java.time.Instant;
-import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AuthService {
+
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final JwtEncoder jwtEncoder;
+    private final TokenService tokenService;
 
-    public AuthService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, JwtEncoder jwtEncoder){
+    public AuthService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, TokenService tokenService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtEncoder = jwtEncoder;
+        this.tokenService = tokenService;
     }
 
-    @Transactional
-    public SigninResponse signin(SigninRequest signinRequest) {
-        try{
-            Optional<User> userFound = userRepository.findByEmail(signinRequest.email());
+    @Transactional(readOnly = true)
+    public SigninResponse signin(SigninRequest request) {
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
-            if(userFound.isEmpty() || !passwordEncoder.matches(signinRequest.passwd(), userFound.get().getPasswd())){
-                throw new BadCredentialsException("user or/and password is invalid!");
-            }
-
-            User user = userFound.get();
-
-            var now = Instant.now();
-            var expiresIn = 300L;
-
-            var claims = JwtClaimsSet.builder()
-                    .issuer("")
-                    .subject(user.getId().toString())
-                    .issuedAt(now)
-                    .expiresAt(now.plusSeconds(expiresIn))
-                    .build();
-
-            var jwt = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
-
-            SigninResponse signinResponse = new SigninResponse(jwt, expiresIn);
-            return signinResponse;
-        } catch (Exception e) {throw new RequestRejectedException("");
+        if (!passwordEncoder.matches(request.passwd(), user.getPasswd())) {
+            throw new BadCredentialsException("Invalid email or password");
         }
+
+        String accessToken = tokenService.generateAccessToken(user);
+        String refreshToken = tokenService.generateRefreshToken(user.getId());
+
+        return new SigninResponse(accessToken, refreshToken, 300L);
+    }
+
+    @Transactional(readOnly = true)
+    public SigninResponse refresh(String oldRefreshToken) {
+        String userIdStr = tokenService.getUserIdFromRefreshToken(oldRefreshToken);
+        UUID userId = UUID.fromString(userIdStr);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BadCredentialsException("User not found or disabled"));
+
+        // Revogar token antigo (uso único - Rotação)
+        tokenService.revokeRefreshToken(oldRefreshToken);
+
+        // Gerar novos tokens
+        String newAccessToken = tokenService.generateAccessToken(user);
+        String newRefreshToken = tokenService.generateRefreshToken(user.getId());
+
+        return new SigninResponse(newAccessToken, newRefreshToken, 300L);
+    }
+
+    public void logout(String refreshToken) {
+        tokenService.revokeRefreshToken(refreshToken);
     }
 }
