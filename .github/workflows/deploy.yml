@@ -49,4 +49,4 @@ jobs:
           script: |
             cd ~/apps/EventFlow-backend            
             git pull origin main
-            docker compose up -f compose.yaml -d --build --remove-orphans
+            docker compose -f compose.yaml up -d --build --remove-orphans
