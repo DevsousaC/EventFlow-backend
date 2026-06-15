@@ -8,5 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface EventRepository extends JpaRepository<Event, UUID> {
-    Optional<Event> findByCreator(UUID userId);
+    Optional<Event> findByCreatedBy(UUID userId);
+    Optional<Event> findByCnpj(String cnpj);
 }

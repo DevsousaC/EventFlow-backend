@@ -12,11 +12,15 @@ import spring.infra.api.services.AuthService;
 import spring.infra.api.services.EventService;
 import spring.infra.api.services.UserService;
 
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/event")
 public class EventController {
 
-    private EventService eventService;
+    private final EventService eventService;
 
     public EventController(EventService eventService){
         this.eventService = eventService;
@@ -26,9 +30,12 @@ public class EventController {
     public ResponseEntity<CreateEventResponse> createEvent(
             @Valid
             @RequestBody
-            CreateEventRequest createEventRequest
+            CreateEventRequest createEventRequest,
+            @AuthenticationPrincipal
+            Jwt jwt
     ){
-        CreateEventResponse response = this.eventService.createEvent(createEventRequest);
+        UUID userId = UUID.fromString(jwt.getSubject());
+        CreateEventResponse response = this.eventService.createEvent(createEventRequest, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
