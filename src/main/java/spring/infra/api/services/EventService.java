@@ -78,7 +78,7 @@ public class EventService {
                 .orElseThrow(() -> new EventNotFoundException("Event not found"));
 
         if (!event.getCreatedBy().equals(userId)) {
-            throw new UnauthorizedAccessException(\"You don't have permission to update this event");
+            throw new UnauthorizedAccessException("You don't have permission to update this event");
         }
 
         if (request.endsAt() <= request.startsAt()) {
